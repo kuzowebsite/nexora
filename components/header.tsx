@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Moon, Sun, User, LogOut, PlusCircle, ShoppingCart, LifeBuoy } from "lucide-react" // LifeBuoy icon-ийг нэмэв
+import { Bell, Moon, Sun, User, LogOut, PlusCircle, ShoppingCart, LifeBuoy, GraduationCap } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,20 +18,18 @@ export function Header() {
   const [user, setUser] = useState({
     name: "Очир Бат",
     email: "ochir.bat@example.com",
-    gender: "Эрэгтэй", // Энэ утгыг хэрэглэгчийн жинхэнэ хүйсээр солих шаардлагатай
-    avatarSrc: "", // Эхний утга, хэрэглэгч зураг оруулаагүй бол хоосон байна
+    gender: "Эрэгтэй",
+    avatarSrc: "",
   })
 
   const { theme, setTheme } = useTheme()
 
-  // Жишээ мэдэгдлүүд
   const notifications = [
     { id: "n1", text: "Шинэ судалгаа нэмэгдлээ: Онлайн худалдаа", timestamp: "10 минутын өмнө" },
     { id: "n2", text: "Таны судалгааг 5 хүн бөглөлөө.", timestamp: "1 цагийн өмнө" },
     { id: "n3", text: "Түрүүвч рүү 500₮ орлоо.", timestamp: "3 цагийн өмнө" },
   ]
 
-  // Аватарын зургийг хүйсийн дагуу эсвэл хэрэглэгчийн оруулсан зургаар тодорхойлох
   const getAvatarSrc = () => {
     if (user.avatarSrc && !user.avatarSrc.startsWith("/placeholder.svg")) {
       return user.avatarSrc
@@ -40,7 +38,7 @@ export function Header() {
     } else if (user.gender === "Эмэгтэй") {
       return "/images/female.avif"
     }
-    return "/placeholder.svg?height=40&width=40" // Бусад эсвэл тодорхойгүй үеийн анхдагч
+    return "/placeholder.svg?height=40&width=40"
   }
 
   return (
@@ -49,7 +47,6 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              {/* Хэрэглэгчийн мэдээллийн блок нь унадаг цэсийг идэвхжүүлэгч болно */}
               <div className="flex items-center cursor-pointer">
                 <Avatar className="h-10 w-10 border-2 border-yellow-400">
                   <AvatarImage src={getAvatarSrc() || "/placeholder.svg"} alt="Хэрэглэгчийн зураг" />
@@ -97,13 +94,12 @@ export function Header() {
                   <span>Профайл</span>
                 </Link>
               </DropdownMenuItem>
-              {/* Шинээр нэмэгдсэн цэсийн элементүүд */}
               <DropdownMenuItem asChild>
                 <Link
-                  href="/permissions" // Жишээ зам, шаардлагатай бол өөрчилнө
+                  href="/permissions"
                   className="flex items-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 px-2 py-1.5 rounded-sm"
                 >
-                  <User className="mr-2 h-4 w-4" /> {/* Энд тохирох icon ашиглана уу, жишээ нь User */}
+                  <User className="mr-2 h-4 w-4" />
                   <span>Эрх</span>
                 </Link>
               </DropdownMenuItem>
@@ -118,6 +114,15 @@ export function Header() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
+                  href="/create-training"
+                  className="flex items-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 px-2 py-1.5 rounded-sm"
+                >
+                  <GraduationCap className="mr-2 h-4 w-4" />
+                  <span>Сурчилгаа нэмэх</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
                   href="/purchase"
                   className="flex items-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 px-2 py-1.5 rounded-sm"
                 >
@@ -125,17 +130,15 @@ export function Header() {
                   <span>Худалдан авалт</span>
                 </Link>
               </DropdownMenuItem>
-              {/* Тусламж цэсийн элемент */}
               <DropdownMenuItem asChild>
                 <Link
-                  href="/help" // Тусламжийн хуудасны зам
+                  href="/help"
                   className="flex items-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 px-2 py-1.5 rounded-sm"
                 >
                   <LifeBuoy className="mr-2 h-4 w-4" />
                   <span>Тусламж</span>
                 </Link>
               </DropdownMenuItem>
-              {/* ... бусад цэсийн элементүүд */}
               <DropdownMenuItem asChild>
                 <Link
                   href="/auth/login"
