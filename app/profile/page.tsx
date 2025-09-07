@@ -10,13 +10,45 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Edit, ListChecks, Save, X } from "lucide-react"
-import {
-  Select, // Select-ийг импортлов
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+// Location data for Mongolia
+const mongoliaLocations = {
+  provinces: [
+    "Архангай",
+    "Баян-Өлгий",
+    "Баянхонгор",
+    "Булган",
+    "Говь-Алтай",
+    "Говьсүмбэр",
+    "Дархан-Уул",
+    "Дорноговь",
+    "Дорнод",
+    "Дундговь",
+    "Завхан",
+    "Орхон",
+    "Өвөрхангай",
+    "Өмнөговь",
+    "Сүхбаатар",
+    "Сэлэнгэ",
+    "Төв",
+    "Увс",
+    "Ховд",
+    "Хөвсгөл",
+    "Хэнтий",
+  ],
+  ulaanbaatarDistricts: [
+    "Багануур",
+    "Багахангай",
+    "Баянгол",
+    "Баянзүрх",
+    "Налайх",
+    "Сонгинохайрхан",
+    "Сүхбаатар",
+    "Хан-Уул",
+    "Чингэлтэй",
+  ],
+}
 
 export default function UserProfilePage() {
   const [user, setUser] = useState({
@@ -25,9 +57,10 @@ export default function UserProfilePage() {
     gender: "Эрэгтэй",
     age: 28,
     phoneNumber: "99112233",
-    completedSurveys: 15, // Ensure these are initialized
-    createdSurveys: 3, // Ensure these are initialized
-    avatarSrc: "/placeholder.svg?height=64&width=64", // Initialize with a generic placeholder
+    location: "Улаанбаатар",
+    completedSurveys: 15,
+    createdSurveys: 3,
+    avatarSrc: "/placeholder.svg?height=64&width=64",
   })
 
   const [isEditing, setIsEditing] = useState(false)
@@ -36,6 +69,7 @@ export default function UserProfilePage() {
   const [editedGender, setEditedGender] = useState(user.gender)
   const [editedAge, setEditedAge] = useState(user.age)
   const [editedPhoneNumber, setEditedPhoneNumber] = useState(user.phoneNumber)
+  const [editedLocation, setEditedLocation] = useState(user.location)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSave = () => {
@@ -46,6 +80,7 @@ export default function UserProfilePage() {
       gender: editedGender,
       age: editedAge,
       phoneNumber: editedPhoneNumber,
+      location: editedLocation,
     })
     setIsEditing(false)
     alert("Профайл амжилттай хадгалагдлаа!")
@@ -57,6 +92,7 @@ export default function UserProfilePage() {
     setEditedGender(user.gender)
     setEditedAge(user.age)
     setEditedPhoneNumber(user.phoneNumber)
+    setEditedLocation(user.location)
     setIsEditing(false)
   }
 
@@ -94,7 +130,7 @@ export default function UserProfilePage() {
                         ? "/images/male.avif"
                         : user.gender === "Эмэгтэй"
                           ? "/images/female.avif"
-                          : "/placeholder.svg?height=64&width=64" // Fallback for "Бусад" or other cases
+                          : "/placeholder.svg?height=64&width=64"
                   }
                   alt="Хэрэглэгчийн зураг"
                 />
@@ -134,7 +170,7 @@ export default function UserProfilePage() {
                     onChange={(e) => setEditedEmail(e.target.value)}
                     className="bg-zinc-100 dark:bg-zinc-700 border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white"
                   />
-                  {/* Хүйс сонгох хэсэг - Select компонент ашиглав */}
+                  {/* Хүйс сонгох хэсэг */}
                   <div className="grid gap-2">
                     <Label htmlFor="edit-gender">Хүйс</Label>
                     <Select onValueChange={setEditedGender} value={editedGender}>
@@ -148,6 +184,31 @@ export default function UserProfilePage() {
                         <SelectItem value="Эрэгтэй">Эрэгтэй</SelectItem>
                         <SelectItem value="Эмэгтэй">Эмэгтэй</SelectItem>
                         <SelectItem value="Бусад">Бусад</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {/* Байршил сонгох хэсэг */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit-location">Байршил</Label>
+                    <Select onValueChange={setEditedLocation} value={editedLocation}>
+                      <SelectTrigger
+                        id="edit-location"
+                        className="bg-zinc-100 dark:bg-zinc-700 border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white"
+                      >
+                        <SelectValue placeholder="Байршил сонгоно уу" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700 max-h-60">
+                        <SelectItem value="Улаанбаатар">Улаанбаатар</SelectItem>
+                        {mongoliaLocations.ulaanbaatarDistricts.map((district) => (
+                          <SelectItem key={district} value={`УБ-${district}`}>
+                            УБ - {district}
+                          </SelectItem>
+                        ))}
+                        {mongoliaLocations.provinces.map((province) => (
+                          <SelectItem key={province} value={province}>
+                            {province}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -180,6 +241,7 @@ export default function UserProfilePage() {
                   <CardTitle className="text-2xl">{user.name}</CardTitle>
                   <CardDescription className="text-zinc-600 dark:text-zinc-300">{user.email}</CardDescription>
                   <p className="text-zinc-600 dark:text-zinc-300 text-sm mt-1">Хүйс: {user.gender}</p>
+                  <p className="text-zinc-600 dark:text-zinc-300 text-sm">Байршил: {user.location}</p>
                   <p className="text-zinc-600 dark:text-zinc-300 text-sm">Нас: {user.age}</p>
                   <p className="text-zinc-600 dark:text-zinc-300 text-sm">Утасны дугаар: {user.phoneNumber}</p>
                 </>
@@ -187,8 +249,6 @@ export default function UserProfilePage() {
             </div>
           </CardHeader>
           <CardContent className="pt-2">
-            {" "}
-            {/* pt-4-ийг pt-2 болгов */}
             {isEditing ? (
               <div className="flex gap-2">
                 <Button
