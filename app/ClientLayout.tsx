@@ -23,6 +23,7 @@ export default function ClientLayout({
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [isClient, setIsClient] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const hideNav = pathname === "/auth/login"
 
   useEffect(() => {
@@ -32,44 +33,79 @@ export default function ClientLayout({
   useEffect(() => {
     if (!isClient) return
 
-    const hasSeenSplash = localStorage.getItem("hasSeenSplash")
+    try {
+      const hasSeenSplash = localStorage.getItem("hasSeenSplash")
 
-    if (!hasSeenSplash) {
-      const timer = setTimeout(() => {
+      if (!hasSeenSplash) {
+        const timer = setTimeout(() => {
+          setShowSplash(false)
+          localStorage.setItem("hasSeenSplash", "true")
+
+          try {
+            const loggedInStatus = localStorage.getItem("isLoggedIn")
+            if (loggedInStatus === "true") {
+              setIsLoggedIn(true)
+            } else {
+              setIsLoggedIn(false)
+              if (pathname !== "/auth/login") {
+                router.push("/auth/login")
+              }
+            }
+          } catch (error) {
+            console.error("Error checking login status:", error)
+            setIsLoggedIn(false)
+            if (pathname !== "/auth/login") {
+              router.push("/auth/login")
+            }
+          }
+
+          setIsLoading(false)
+        }, 2000)
+
+        return () => clearTimeout(timer)
+      } else {
         setShowSplash(false)
-        localStorage.setItem("hasSeenSplash", "true")
-        const loggedInStatus = localStorage.getItem("isLoggedIn")
-        if (loggedInStatus === "true") {
-          setIsLoggedIn(true)
-        } else {
+
+        try {
+          const loggedInStatus = localStorage.getItem("isLoggedIn")
+          if (loggedInStatus === "true") {
+            setIsLoggedIn(true)
+          } else {
+            setIsLoggedIn(false)
+            if (pathname !== "/auth/login") {
+              router.push("/auth/login")
+            }
+          }
+        } catch (error) {
+          console.error("Error checking login status:", error)
           setIsLoggedIn(false)
           if (pathname !== "/auth/login") {
             router.push("/auth/login")
           }
         }
-      }, 2000)
 
-      return () => clearTimeout(timer)
-    } else {
+        setIsLoading(false)
+      }
+    } catch (error) {
+      console.error("Error in ClientLayout useEffect:", error)
       setShowSplash(false)
-      const loggedInStatus = localStorage.getItem("isLoggedIn")
-      if (loggedInStatus === "true") {
-        setIsLoggedIn(true)
-      } else {
-        setIsLoggedIn(false)
-        if (pathname !== "/auth/login") {
-          router.push("/auth/login")
-        }
+      setIsLoggedIn(false)
+      setIsLoading(false)
+      if (pathname !== "/auth/login") {
+        router.push("/auth/login")
       }
     }
   }, [pathname, router, isClient])
 
-  if (!isClient) {
+  if (!isClient || isLoading) {
     return (
       <html lang="mn" suppressHydrationWarning>
         <body className={inter.className}>
           <div className="flex items-center justify-center min-h-screen bg-white dark:bg-zinc-900">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-zinc-600 dark:text-zinc-400">Ачааллаж байна...</p>
+            </div>
           </div>
         </body>
       </html>
@@ -77,11 +113,28 @@ export default function ClientLayout({
   }
 
   if (showSplash) {
-    return <LoadingSplash />
+    return (
+      <html lang="mn" suppressHydrationWarning>
+        <body className={inter.className}>
+          <LoadingSplash />
+        </body>
+      </html>
+    )
   }
 
   if (!isLoggedIn && pathname !== "/auth/login") {
-    return null
+    return (
+      <html lang="mn" suppressHydrationWarning>
+        <body className={inter.className}>
+          <div className="flex items-center justify-center min-h-screen bg-white dark:bg-zinc-900">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-zinc-600 dark:text-zinc-400">Нэвтэрч байна...</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    )
   }
 
   return (
