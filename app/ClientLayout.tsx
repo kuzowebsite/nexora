@@ -9,7 +9,7 @@ import { BottomNavigation } from "@/components/bottom-navigation"
 import { Toaster } from "@/components/ui/toaster"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
-import LoadingSplash from "@/components/loading-splash" // Import LoadingSplash
+import LoadingSplash from "@/components/loading-splash"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,18 +21,23 @@ export default function ClientLayout({
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [showSplash, setShowSplash] = useState(true) // State to control splash screen visibility
+  const [showSplash, setShowSplash] = useState(true)
+  const [isClient, setIsClient] = useState(false)
   const hideNav = pathname === "/auth/login"
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
     const hasSeenSplash = localStorage.getItem("hasSeenSplash")
 
     if (!hasSeenSplash) {
-      // Show splash for a duration if not seen before
       const timer = setTimeout(() => {
         setShowSplash(false)
-        localStorage.setItem("hasSeenSplash", "true") // Mark splash as seen
-        // After splash, proceed with login check
+        localStorage.setItem("hasSeenSplash", "true")
         const loggedInStatus = localStorage.getItem("isLoggedIn")
         if (loggedInStatus === "true") {
           setIsLoggedIn(true)
@@ -42,11 +47,10 @@ export default function ClientLayout({
             router.push("/auth/login")
           }
         }
-      }, 2000) // Show splash for 2 seconds
+      }, 2000)
 
-      return () => clearTimeout(timer) // Cleanup timer
+      return () => clearTimeout(timer)
     } else {
-      // If splash has been seen, hide it immediately and proceed with login check
       setShowSplash(false)
       const loggedInStatus = localStorage.getItem("isLoggedIn")
       if (loggedInStatus === "true") {
@@ -58,15 +62,26 @@ export default function ClientLayout({
         }
       }
     }
-  }, [pathname, router])
+  }, [pathname, router, isClient])
+
+  if (!isClient) {
+    return (
+      <html lang="mn" suppressHydrationWarning>
+        <body className={inter.className}>
+          <div className="flex items-center justify-center min-h-screen bg-white dark:bg-zinc-900">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+          </div>
+        </body>
+      </html>
+    )
+  }
 
   if (showSplash) {
     return <LoadingSplash />
   }
 
-  // Only render children if logged in or on the login page
   if (!isLoggedIn && pathname !== "/auth/login") {
-    return null // Or a loading spinner, to prevent flickering before redirect
+    return null
   }
 
   return (
