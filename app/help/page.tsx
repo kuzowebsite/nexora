@@ -45,7 +45,7 @@ export default function HelpPage() {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
-              <AccordionTrigger>3. Түрүүвч ба Цэнэглэлт</AccordionTrigger>
+              <AccordionTrigger>3. Түрүү��ч ба Цэнэглэлт</AccordionTrigger>
               <AccordionContent>
                 <p className="mb-2">
                   Таны цуглуулсан урамшуулал "Түрүүвч" хэсэгт харагдана. Та түрүүвчээ цэнэглэх эсвэл цуглуулсан оноогоо
