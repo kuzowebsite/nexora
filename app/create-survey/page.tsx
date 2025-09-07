@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { PlusCircle, XCircle, Star } from "lucide-react" // Added icons
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" // Added Select
+import { PlusCircle, XCircle, Star } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -15,18 +15,57 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog" // Added Dialog components
-import { useToast } from "@/hooks/use-toast" // Added useToast
+} from "@/components/ui/dialog"
+import { useToast } from "@/hooks/use-toast"
 
-// Updated Question interface
+// Location data for Mongolia
+const mongoliaLocations = {
+  provinces: [
+    "Архангай",
+    "Баян-Өлгий",
+    "Баянхонгор",
+    "Булган",
+    "Говь-Алтай",
+    "Говьсүмбэр",
+    "Дархан-Уул",
+    "Дорноговь",
+    "Дорнод",
+    "Дундговь",
+    "Завхан",
+    "Орхон",
+    "Өвөрхангай",
+    "Өмнөговь",
+    "Сүхбаатар",
+    "Сэлэнгэ",
+    "Төв",
+    "Увс",
+    "Ховд",
+    "Хөвсгөл",
+    "Хэнтий",
+  ],
+  ulaanbaatarDistricts: [
+    "Багануур",
+    "Багахангай",
+    "Баянгол",
+    "Баянзүрх",
+    "Налайх",
+    "Сонгинохайрхан",
+    "Сүхбаатар",
+    "Хан-Уул",
+    "Чингэлтэй",
+  ],
+}
+
+const ageRanges = ["10 - 18", "18 - 32", "32 - 46", "46 - 58", "58+"]
+
 interface Question {
   id: number
   text: string
-  questionContentType: "text" | "image" | "video" // What content does the question prompt have
-  mediaUrl?: string // URL for image/video content (if URL chosen)
-  mediaFile?: File | null // For file upload option (if File chosen)
-  useFileUpload?: boolean // New: true if user chose file upload, false for URL
-  answerType: "text" | "radio" | "checkbox" | "rating" // How the user responds
+  questionContentType: "text" | "image" | "video"
+  mediaUrl?: string
+  mediaFile?: File | null
+  useFileUpload?: boolean
+  answerType: "text" | "radio" | "checkbox" | "rating"
   options?: { id: number; value: string; label: string }[]
 }
 
@@ -35,6 +74,8 @@ export default function CreateSurveyPage() {
   const [surveyDescription, setSurveyDescription] = useState("")
   const [rewardPerParticipant, setRewardPerParticipant] = useState<number | string>("")
   const [maxParticipants, setMaxParticipants] = useState<number | string>("")
+  const [targetLocation, setTargetLocation] = useState("Бүгд")
+  const [targetAgeRange, setTargetAgeRange] = useState("Бүгд")
   const [questions, setQuestions] = useState<Question[]>([
     { id: 1, text: "", questionContentType: "text", answerType: "text", useFileUpload: false },
   ])
@@ -111,7 +152,7 @@ export default function CreateSurveyPage() {
       prevQuestions.map((q) => {
         if (q.id === questionId && (q.answerType === "radio" || q.answerType === "checkbox") && q.options) {
           const filteredOptions = q.options.filter((opt) => opt.id !== optionId)
-          return { ...q, options: filteredOptions.length > 0 ? filteredOptions : undefined } // Changed to undefined if no options left
+          return { ...q, options: filteredOptions.length > 0 ? filteredOptions : undefined }
         }
         return q
       }),
@@ -122,8 +163,8 @@ export default function CreateSurveyPage() {
     setQuestions((prevQuestions) =>
       prevQuestions.map((q) => {
         if (q.id === questionId && (q.answerType === "radio" || q.answerType === "checkbox") && q.options) {
-          const updatedOptions = q.options.map(
-            (opt) => (opt.id === optionId ? { ...opt, value: value, label: value } : opt), // Label and value are same for simplicity
+          const updatedOptions = q.options.map((opt) =>
+            opt.id === optionId ? { ...opt, value: value, label: value } : opt,
           )
           return { ...q, options: updatedOptions }
         }
@@ -199,25 +240,20 @@ export default function CreateSurveyPage() {
     setIsSubmitting(true)
     setShowPaymentDialog(false)
 
-    // Simulate payment deduction from wallet
-    // In a real application, you would call a Server Action here
-    // that interacts with your database to deduct the balance and create the survey.
-    // For example: const result = await createSurveyAndDeductBalance({ totalCost, surveyData });
-    // And then handle success/failure based on the result.
+    await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    await new Promise((resolve) => setTimeout(resolve, 1500)) // Simulate network request
-
-    const currentBalance = 15000 // This should come from a global state or backend
+    const currentBalance = 15000
     if (currentBalance >= totalCost) {
       toast({
         title: "Амжилттай",
         description: `Судалгаа амжилттай үүсгэгдлээ! Таны түрүүвчнээс ${totalCost}₮ хасагдлаа.`,
       })
-      // Reset form after successful payment
       setSurveyTitle("")
       setSurveyDescription("")
       setRewardPerParticipant("")
       setMaxParticipants("")
+      setTargetLocation("Бүгд")
+      setTargetAgeRange("Бүгд")
       setQuestions([{ id: 1, text: "", questionContentType: "text", answerType: "text", useFileUpload: false }])
     } else {
       toast({
@@ -263,6 +299,55 @@ export default function CreateSurveyPage() {
                 className="bg-zinc-100 dark:bg-zinc-700 border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:placeholder:text-zinc-400"
               />
             </div>
+
+            {/* Location and Age Targeting */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="target-location">Байршил</Label>
+                <Select value={targetLocation} onValueChange={setTargetLocation}>
+                  <SelectTrigger
+                    id="target-location"
+                    className="bg-zinc-100 dark:bg-zinc-700 border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white"
+                  >
+                    <SelectValue placeholder="Байршил сонгоно уу" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700 max-h-60">
+                    <SelectItem value="Бүгд">Бүгд</SelectItem>
+                    <SelectItem value="Улаанбаатар">Улаанбаатар</SelectItem>
+                    {mongoliaLocations.ulaanbaatarDistricts.map((district) => (
+                      <SelectItem key={district} value={`УБ-${district}`}>
+                        УБ - {district}
+                      </SelectItem>
+                    ))}
+                    {mongoliaLocations.provinces.map((province) => (
+                      <SelectItem key={province} value={province}>
+                        {province}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="target-age">Насны ангилал</Label>
+                <Select value={targetAgeRange} onValueChange={setTargetAgeRange}>
+                  <SelectTrigger
+                    id="target-age"
+                    className="bg-zinc-100 dark:bg-zinc-700 border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white"
+                  >
+                    <SelectValue placeholder="Насны ангилал сонгоно уу" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700">
+                    <SelectItem value="Бүгд">Бүгд</SelectItem>
+                    {ageRanges.map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="survey-reward">Нэг бөглөлтөд олгох шагнал (₮)</Label>
@@ -291,9 +376,21 @@ export default function CreateSurveyPage() {
                 />
               </div>
             </div>
+
+            {/* Target Info Display */}
             <div className="grid gap-2 p-4 bg-zinc-100 dark:bg-zinc-700 rounded-md">
-              <span className="text-lg font-medium">Нийт төлбөр:</span>
-              <span className="text-2xl font-bold text-green-600 dark:text-green-400">{totalCost}₮</span>
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-medium">Нийт төлбөр:</span>
+                <span className="text-2xl font-bold text-green-600 dark:text-green-400">{totalCost}₮</span>
+              </div>
+              <div className="text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
+                <p>
+                  Зорилтот байршил: <span className="font-medium">{targetLocation}</span>
+                </p>
+                <p>
+                  Зорилтот нас: <span className="font-medium">{targetAgeRange}</span>
+                </p>
+              </div>
             </div>
 
             <div className="grid gap-4">
@@ -383,12 +480,9 @@ export default function CreateSurveyPage() {
                             />
                             {q.mediaFile && (
                               <p className="text-xs text-green-600 dark:text-green-400">
-                                Файл сонгогдлоо: {q.mediaFile.name} (Урьдчилан харах боломжгүй)
+                                Файл сонгогдлоо: {q.mediaFile.name}
                               </p>
                             )}
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                              Жич: Бодит аппликейшнд энэ файлыг серверт байршуулна.
-                            </p>
                           </>
                         ) : (
                           <>
@@ -446,19 +540,18 @@ export default function CreateSurveyPage() {
                               onChange={(e) => handleOptionChange(q.id, option.id, e.target.value)}
                               className="bg-zinc-200 dark:bg-zinc-600 border-zinc-300 dark:border-zinc-500 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:placeholder:text-zinc-400"
                             />
-                            {q.options &&
-                              q.options.length > 0 && ( // Allow removing only if there's at least one option
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => removeOption(q.id, option.id)}
-                                  aria-label={`Сонголт ${optIndex + 1}-ийг устгах`}
-                                  className="text-red-500 hover:bg-zinc-200 dark:hover:bg-zinc-600"
-                                >
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                              )}
+                            {q.options && q.options.length > 0 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeOption(q.id, option.id)}
+                                aria-label={`Сонголт ${optIndex + 1}-ийг устгах`}
+                                className="text-red-500 hover:bg-zinc-200 dark:hover:bg-zinc-600"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         ))}
                         <Button
@@ -478,10 +571,7 @@ export default function CreateSurveyPage() {
                         <Label>Үнэлгээний хэлбэр (Урьдчилан харах)</Label>
                         <div className="flex items-center gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className="h-6 w-6 text-yellow-400 fill-yellow-400" // Static filled stars for preview
-                            />
+                            <Star key={star} className="h-6 w-6 text-yellow-400 fill-yellow-400" />
                           ))}
                           <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-2">1-5 одны үнэлгээ</span>
                         </div>
@@ -512,7 +602,6 @@ export default function CreateSurveyPage() {
         </CardContent>
       </Card>
 
-      {/* Payment Confirmation Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
         <DialogContent className="max-w-[90vw] sm:max-w-md bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-200 dark:border-zinc-700">
           <DialogHeader>
@@ -520,6 +609,11 @@ export default function CreateSurveyPage() {
             <DialogDescription>
               Та энэ судалгааг үүсгэхийн тулд нийт{" "}
               <span className="font-bold text-green-600 dark:text-green-400">{totalCost}₮</span> төлөх гэж байна.
+              <br />
+              <span className="text-sm">
+                Зорилтот бүлэг: {targetLocation} ({targetAgeRange} нас)
+              </span>
+              <br />
               Үргэлжлүүлэх үү?
             </DialogDescription>
           </DialogHeader>
