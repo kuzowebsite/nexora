@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { Edit, ListChecks, Save, X } from "lucide-react"
+import { Edit, ListChecks, Save, X, GraduationCap } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Location data for Mongolia
@@ -60,6 +60,8 @@ export default function UserProfilePage() {
     location: "Улаанбаатар",
     completedSurveys: 15,
     createdSurveys: 3,
+    completedTrainings: 8,
+    createdTrainings: 2,
     avatarSrc: "/placeholder.svg?height=64&width=64",
   })
 
@@ -302,6 +304,34 @@ export default function UserProfilePage() {
                 className="w-full mt-4 bg-transparent border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700"
               >
                 Миний үүсгэсэн судалгаанууд
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Сурчилгааны статистик */}
+        <Card className="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white">
+          <CardHeader className="flex flex-row items-center justify-between pb-0">
+            <CardTitle className="text-xl">Сурчилгааны статистик</CardTitle>
+            <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between text-lg">
+                <span>Дуусгасан сурчилгаа:</span>
+                <span className="font-bold text-green-600 dark:text-green-400">{user.completedTrainings}</span>
+              </div>
+              <div className="flex items-center justify-between text-lg">
+                <span>Үүсгэсэн сурчилгаа:</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{user.createdTrainings}</span>
+              </div>
+            </div>
+            <Link href="/profile/my-trainings" passHref>
+              <Button
+                variant="outline"
+                className="w-full mt-4 bg-transparent border-zinc-200 dark:border-zinc-600 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-700"
+              >
+                Миний үүсгэсэн сурчилгаанууд
               </Button>
             </Link>
           </CardContent>
